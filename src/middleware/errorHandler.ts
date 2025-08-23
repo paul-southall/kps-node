@@ -6,10 +6,13 @@ export interface AppError extends Error {
 }
 
 export const createError = (message: string, statusCode: number): AppError => {
-  const error = new Error(message) as AppError;
-  error.statusCode = statusCode;
-  error.isOperational = true;
-  return error;
+  // this was a dodgy contruction
+  // as we define statusCode as not undefined above but contruct an error with only a message and use 'as' to cast it
+  return {
+    name: 'AppError',
+    message,
+    statusCode,
+  }
 };
 
 export const errorHandler = (
@@ -23,15 +26,27 @@ export const errorHandler = (
   // - Return appropriate HTTP status codes
   // - Format error responses consistently
   // - Log errors appropriately
+
+
   
-  console.error('Error:', err);
+  if (!err.statusCode) {
+  // CATCH ALL - Default error response
+    res.status(err.statusCode || 500).json({
+      error: {
+        message: err.message || 'Internal Server Error',
+        status: err.statusCode || 500,
+        timestamp: new Date().toISOString(),
+      },
+    });
+  }
   
-  // Default error response
-  res.status(err.statusCode || 500).json({
+  res.status(err.statusCode).json({
     error: {
-      message: err.message || 'Internal Server Error',
-      status: err.statusCode || 500,
+      message: err.message,
+      status: err.statusCode,
       timestamp: new Date().toISOString(),
     },
   });
+
+  next();
 }; 

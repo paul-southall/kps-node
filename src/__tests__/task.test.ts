@@ -218,6 +218,26 @@ describe('Task API Integration Tests', () => {
       expect(response.body.error.message).toContain('length');
     });
 
+    it('should return 409 when task title already exists', async () => {
+      const taskData = {
+        title: 'Duplicate Task',
+        priority: 'high',
+      };
+
+      await request(app)
+        .post('/api/tasks')
+        .send(taskData)
+        .expect(201);
+
+      const response = await request(app)
+        .post('/api/tasks')
+        .send(taskData)
+        .expect(409); // Conflict due to duplicate title
+        
+      expect(response.body.error).toBeDefined();
+      expect(response.body.error.message).toBe('Task title already exists');
+    });
+
     it('should return 400 when description exceeds 500 characters', async () => {
       const taskData = {
         title: 'Test Task',

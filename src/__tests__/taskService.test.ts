@@ -13,6 +13,7 @@ describe('TaskService', () => {
   beforeEach(() => {
     // Clear tasks before each test to ensure test isolation
     // Candidates will need to implement a method to clear tasks or handle this
+    TaskService.clearAllTasks();
     jest.clearAllMocks();
   });
 

@@ -7,7 +7,13 @@ describe('Task Validation', () => {
         title: 'Test Task',
         description: 'Test Description',
         priority: 'high',
-        dueDate: new Date().toISOString(),
+
+        // dueDate: new Date().toISOString(),
+        // This is a dodgy test, as it fails to interpret how joi's handles date validation
+        // Because joi will try to parse the date string and return a Date object
+
+        // Also update the dueDate to be a future date after stretch goal
+        dueDate: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes in the future
       };
 
       const result = validateCreateTask(validTask);
@@ -85,6 +91,32 @@ describe('Task Validation', () => {
         title: 'Test Task',
         priority: 'high',
         dueDate: 'invalid-date',
+      };
+
+      const result = validateCreateTask(invalidTask);
+      expect(result.error).toBeDefined();
+      expect(result.error!.details[0].message).toContain('date');
+    });
+
+    it('should fail validation if dueDate is not a valid ISO date', () => {
+      const invalidTask = {
+        title: 'Test Task',
+        priority: 'high',
+        dueDate: '2024-13-01', // Invalid month
+      };
+
+      const result = validateCreateTask(invalidTask);
+      expect(result.error).toBeDefined();
+      expect(result.error!.details[0].message).toContain('date');
+    }
+    );
+
+    it('should fail validation if dueDate is not in the future', () => {
+      const invalidTask = {
+        title: 'Test Task',
+        priority: 'high',
+        // date 1 day in the past
+        dueDate: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // Past date
       };
 
       const result = validateCreateTask(invalidTask);
